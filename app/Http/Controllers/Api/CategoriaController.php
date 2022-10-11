@@ -7,19 +7,34 @@ use App\Http\Resources\CategoriaResource;
 use App\Models\Categoria;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreCategoriaRequest;
+use Illuminate\Support\Str;
 
 
 class CategoriaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $categorias = Categoria::all();
 
-        return response() -> json([
+
+        $sortParameter = $request->input('ordenacao', 'nome_da_categoria');
+        $sortDirection = Str::startsWith($sortParameter, '-') ? 'desc' : 'asc';
+        $sortColumn = ltrim($sortParameter, '-');
+
+        if($sortColumn == 'nome_da_categoria'){
+            $categorias = Categoria::orderBy('nomedacategoria', $sortDirection)->get();
+
+        } else {
+            $categorias = Categoria::all();
+
+        }
+
+
+         return response() -> json([
             'status' => 200,
-            'mensagem' => 'Lista de categorias retornada',
+           'mensagem' => 'Lista de categorias retornada',
             'categorias' => CategoriaResource::collection($categorias)
-        ], 200);
+         ], 200);
+
     }
 
     public function create()
@@ -66,4 +81,7 @@ class CategoriaController extends Controller
             'mensagem' => 'Categoria apagada',
         ], 200);
     }
+
+
+
 }
